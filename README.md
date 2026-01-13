@@ -1,8 +1,6 @@
 # Self-Organized Criticality – Sandpile Model (Cellular Automata)
 
 Projekt zaliczeniowy z przedmiotu **Systemy Złożone**  
-Studia magisterskie – Informatyka  
-Specjalizacja: *Systemy Inteligentne i Rozszerzona Rzeczywistość*
 
 ## Opis projektu
 
