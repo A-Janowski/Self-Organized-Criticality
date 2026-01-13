@@ -45,3 +45,14 @@ Reguły są zdefiniowane w sposób parametryczny, co umożliwia łatwe dodawanie
 
 ## Struktura projektu
 
+├── sandpile.py # główna implementacja modelu i wizualizacji
+├── constants.py # definicje reguł topplingu
+└── README.md
+
+---
+
+## Wymagania
+
+- Python 3.9+
+- numpy
+- matplotlib
