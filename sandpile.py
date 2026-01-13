@@ -1,3 +1,4 @@
+import constants
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -8,13 +9,14 @@ class Sandpile:
     oparty na automacie komórkowym 2D.
     """
 
-    def __init__(self, size=50, threshold=4):
-        """
-        :param size: rozmiar siatki NxN
-        :param threshold: próg niestabilności (z_c)
-        """
+    def __init__(self, size=50, rule="BTW"): # domyślnie reguła BTW, ale można zmienić
         self.size = size
-        self.threshold = threshold
+        self.rule_name = rule
+        self.rule = constants.RULES[rule]
+        self.threshold = self.rule["threshold"]
+        self.neighbors = self.rule["neighbors"]
+        self.random_toppling = self.rule.get("random", False)
+
         self.grid = np.zeros((size, size), dtype=int)
 
     def add_grain(self, x=None, y=None):
@@ -41,15 +43,22 @@ class Sandpile:
         for x, y in unstable:
             self.grid[x, y] -= self.threshold
 
-            # sąsiedzi von Neumanna (góra, dół, lewo, prawo)
-            if x > 0:
-                self.grid[x - 1, y] += 1
-            if x < self.size - 1:
-                self.grid[x + 1, y] += 1
-            if y > 0:
-                self.grid[x, y - 1] += 1
-            if y < self.size - 1:
-                self.grid[x, y + 1] += 1
+            if self.random_toppling:
+                neighbors = np.random.choice(
+                    len(self.neighbors),
+                    size=self.threshold,
+                    replace=True
+                )
+                for idx in neighbors:
+                    dx, dy = self.neighbors[idx]
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < self.size and 0 <= ny < self.size:
+                        self.grid[nx, ny] += 1
+            else:
+                for dx, dy in self.neighbors:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < self.size and 0 <= ny < self.size:
+                        self.grid[nx, ny] += 1
 
         return True
 
@@ -68,6 +77,10 @@ class Sandpile:
         """
         self.add_grain()
         self.relax()
+
+    # -------------------------------
+    # Wizualizacja dynamiczna pojedyńczego modelu
+    # -------------------------------
 
     def animate(self, steps=5000, interval=50, grains_per_frame=5):
         """
@@ -104,6 +117,59 @@ class Sandpile:
         plt.show()
 
 
+# -------------------------------
+# Wizualizacja dynamiczna wielu modeli jednocześnie
+# -------------------------------
+
+def animate_multiple(models, titles, steps=500, interval=50, grains_per_frame=5):
+    """
+    Animacja porównawcza kilku modeli stożka piasku.
+
+    :param models: lista obiektów Sandpile
+    :param titles: lista tytułów (np. nazw reguł)
+    :param steps: liczba klatek animacji
+    :param interval: opóźnienie między klatkami [ms]
+    :param grains_per_frame: ile ziaren na klatkę
+    """
+
+    n = len(models)
+    fig, axes = plt.subplots(1, n, figsize=(5 * n, 5))
+
+    images = []
+    for ax, model, title in zip(axes, models, titles):
+        img = ax.imshow(
+            model.grid,
+            cmap="inferno",
+            vmin=0,
+            vmax=model.threshold
+        )
+        ax.set_title(title)
+        ax.axis("off")
+        images.append(img)
+
+    fig.colorbar(images[0], ax=axes, fraction=0.02, pad=0.04, label="Liczba ziaren")
+
+    def update(frame):
+        for model in models:
+            for _ in range(grains_per_frame):
+                model.step()
+
+        for img, model in zip(images, models):
+            img.set_data(model.grid)
+
+        fig.suptitle(f"Krok: {frame * grains_per_frame}")
+        return images
+
+    anim = animation.FuncAnimation(
+        fig,
+        update,
+        frames=steps,
+        interval=interval,
+        blit=False
+    )
+
+    plt.show()
+
 
 # -------------------------------
 # Wizualizacja statyczna
@@ -119,14 +185,16 @@ def plot_grid(grid, title="Sandpile"):
 
 
 # -------------------------------
-# Przykładowe uruchomienie
-# -------------------------------
 
 if __name__ == "__main__":
-    model = Sandpile(size=50, threshold=4)
+    model_btw = Sandpile(size=50, rule="BTW")
+    model_moore = Sandpile(size=50, rule="MOORE")
+    model_stochastic = Sandpile(size=50, rule="STOCHASTIC")
 
-    model.animate(
-        steps=1000,
+    animate_multiple(
+        models=[model_btw, model_moore, model_stochastic],
+        titles=["BTW (von Neumann)", "Moore (8 sąsiadów)", "Stochastic"],
+        steps=500,
         interval=50,
         grains_per_frame=10
     )
