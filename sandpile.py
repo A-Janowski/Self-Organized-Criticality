@@ -32,24 +32,25 @@ class Sandpile:
 
     def topple(self):
         """
-        Wykonuje pojedynczy krok relaksacji:
-        rozładowuje wszystkie niestabilne komórki.
-        Zwraca True, jeśli nastąpiło toppling.
+        Zwraca liczbę komórek, które runęły w tym kroku (aktywność).
         """
         unstable = np.argwhere(self.grid >= self.threshold)
-        if len(unstable) == 0:
-            return False
+        count = len(unstable) # Liczymy ile komórek jest niestabilnych
+        
+        if count == 0:
+            return 0
 
         for x, y in unstable:
             self.grid[x, y] -= self.threshold
-
+            
+            # Logika sąsiadów (bez zmian, tylko wcięcie)
             if self.random_toppling:
-                neighbors = np.random.choice(
+                neighbors_idxs = np.random.choice(
                     len(self.neighbors),
                     size=self.threshold,
                     replace=True
                 )
-                for idx in neighbors:
+                for idx in neighbors_idxs:
                     dx, dy = self.neighbors[idx]
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < self.size and 0 <= ny < self.size:
@@ -60,23 +61,28 @@ class Sandpile:
                     if 0 <= nx < self.size and 0 <= ny < self.size:
                         self.grid[nx, ny] += 1
 
-        return True
+        return count
 
     def relax(self):
         """
-        Relaksuje układ do stanu stabilnego.
+        Relaksuje układ i zwraca statystyki lawiny:
+        (całkowita_wielkość, czas_trwania)
         """
-        while self.topple():
-            pass
+        avalanche_size = 0
+        avalanche_duration = 0
+        
+        while True:
+            toppled_count = self.topple()
+            if toppled_count == 0:
+                break
+            avalanche_size += toppled_count
+            avalanche_duration += 1
+            
+        return avalanche_size, avalanche_duration
 
     def step(self):
-        """
-        Jedna iteracja modelu:
-        - dodanie ziarna
-        - pełna relaksacja
-        """
         self.add_grain()
-        self.relax()
+        return self.relax() # Zwracamy wynik relaksacji
 
     # -------------------------------
     # Wizualizacja dynamiczna pojedyńczego modelu
