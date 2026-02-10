@@ -6,7 +6,9 @@ Projekt zaliczeniowy z przedmiotu **Systemy Złożone**
 
 Celem projektu jest zaprezentowanie zjawiska **samoorganizacji w stanie krytycznym (Self-Organized Criticality, SOC)** na przykładzie klasycznego **modelu stożka piasku (Sandpile Model)** zaproponowanego przez Bak, Tang i Wiesenfeld.
 
-Model został zaimplementowany jako **dwuwymiarowy automat komórkowy**, a jego ewolucja jest wizualizowana w czasie rzeczywistym. Projekt umożliwia porównanie różnych lokalnych reguł topplingu i obserwację ich wpływu na globalną dynamikę systemu.
+Model został zaimplementowany jako **dwuwymiarowy automat komórkowy**. Projekt składa się z dwóch głównych modułów:
+1.  **Wizualizacja:** Obserwacja ewolucji układu w czasie rzeczywistym i porównanie reguł.
+2.  **Analiza danych:** Weryfikacja praw potęgowych (Power Laws) poprzez analizę statystyczną lawin.
 
 ---
 
@@ -37,9 +39,12 @@ Reguły są zdefiniowane w sposób parametryczny, co umożliwia łatwe dodawanie
 
 - implementacja automatu komórkowego 2D
 - samoorganizacja układu do stanu krytycznego
-- wizualizacja statyczna stanów układu
-- animacja ewolucji pojedynczego modelu
-- **jednoczesna animacja kilku modeli w jednym oknie** (porównanie reguł)
+- **wizualizacja dynamiczna:** animacja ewolucji pojedynczego modelu
+- **tryb porównawczy:** jednoczesna animacja kilku modeli w jednym oknie
+- **analiza statystyczna (`analysis.py`):**
+    - pomiar wielkości i czasu trwania lawin
+    - generowanie wykresów w skali **log-log** (weryfikacja prawa potęgowego)
+    - analiza wpływu rozmiaru siatki na dynamikę (Finite Size Scaling)
 
 ---
 
@@ -48,6 +53,8 @@ Reguły są zdefiniowane w sposób parametryczny, co umożliwia łatwe dodawanie
 ├── sandpile.py # główna implementacja modelu i wizualizacji
 
 ├── constants.py # definicje reguł topplingu
+
+├── analysis.py # moduł do symulacji "headless", zbierania danych i rysowania wykresów
 
 └── README.md
 
